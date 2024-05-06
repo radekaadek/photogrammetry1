@@ -261,76 +261,53 @@
 
 import click
 
-# predkosc, pulap, czas
-# matryca px, pixel, kanły spektralne, ogniskowa, cykl pracy, waga
-
-# @click.option('--f', prompt='Podaj ogniskową kamery', help='Ogniskowa kamery', type=float)
-# @click.option('--px', prompt='Podaj px', help='px', type=float)
-# @click.option('--lX', prompt='Podaj lX', help='lX', type=float)
-# @click.option('--lY', prompt='Podaj lY', help='lY', type=float)
-# @click.option('--p', prompt='Podaj p', help='p', type=float)
-# @click.option('--q', prompt='Podaj q', help='q', type=float)
-# @click.option('--DX', prompt='Podaj DX', help='DX', type=float)
-# @click.option('--DY', prompt='Podaj DY', help='DY', type=float)
-# @click.command()
-# @click.option('--W', prompt='Podaj wysokość lotu', help='Wysokość lotu', type=float)
-# def plane(f, w, px, lx, ly, p, q, dx, dy):
-#     if w == 0 or lx == 0 or ly == 0 or f == 0:
-#         print('Wartości w, lx, ly i f nie mogą być równe 0')
-#         return
-#     gsd = px * w / f
-#     m = f / w
-#     lx = lx * gsd
-#     ly = ly * gsd
-#     bx = lx * (100 - p) / 100
-#     by = ly * (100 - q) / 100
-#     pz = lx * ly
-#     pm = (lx - bx) * ly
-#     pn = bx * by
-#     ny = dx / bx + 4
-#     nx = dy / by + 4
-#     ny = round(ny)
-#     nx = round(nx)
-#     print(f'GSD: {gsd}')
-#     print(f'm: {m}')
-#     print(f'LX: {lx}')
-#     print(f'LY: {ly}')
-#     print(f'BX: {bx}')
-#     print(f'BY: {by}')
-#     print(f'PZ: {pz}')
-#     print(f'PM: {pm}')
-#     print(f'PN: {pn}')
-#     print(f'NY: {ny}')
-#     print(f'NX: {nx}')
-
-@click.command()
-# @click.option('--f', prompt='Podaj ogniskową kamery', help='Ogniskowa kamery', type=float)
-# @click.option('-
-# @click.option('--px', prompt='Podaj px', help='px', type=float)
-# @click.option('--lX', prompt='Podaj lX', help='lX', type=float)
-# @click.option('--lY', prompt='Podaj lY', help='lY', type=float)
-def camera_params(f, px, lX, lY):
-    gsd = click.prompt("Podaj GSD", type=float)
+def camera_params():
     f = click.prompt("Podaj ogniskową kamery", type=float)
+    while f <= 0:
+        click.echo('Wartość f nie może być mniejsza lub równa 0')
+        f = click.prompt("Podaj ogniskową kamery", type=float)
     px = click.prompt("Podaj px", type=float)
+    while px <= 0:
+        click.echo('Wartość px nie może być mniejsza lub równa 0')
+        px = click.prompt("Podaj px", type=float)
     lX = click.prompt("Podaj lX", type=float)
+    while lX <= 0:
+        click.echo('Wartość lX nie może być mniejsza lub równa 0')
+        lX = click.prompt("Podaj lX", type=float)
     lY = click.prompt("Podaj lY", type=float)
-    while f == 0 or px == 0 or lX == 0 or lY == 0:
-        click.echo('Wartości f, px, lX i lY nie mogą być równe 0')
-        gsd, m, LX, LY, BX, BY = camera_params()
-    m = f / px
-    LX = lX * gsd
-    LY = lY * gsd
-    BX = LX * (100 - 60) / 100
-    BY = LY * (100 - 30) / 100
-    return gsd, m, LX, LY, BX, BY
+    while lY <= 0:
+        click.echo('Wartość lY nie może być mniejsza lub równa 0')
+        lY = click.prompt("Podaj lY", type=float)
+    return f, px, lX, lY
 
+def print_params(lX, lY, p, q, DX, DY, gsd):
+    Lx = lX * gsd
+    Ly = lY * gsd
+    Bx = Lx * (100 - p) / 100
+    By = Ly * (100 - q) / 100
+    Pz = Lx * Ly
+    Pm = (Lx - Bx) * Ly
+    Pn = Bx * By
+    Ny = DX / Bx + 4
+    Nx = DY / By + 4
+    Ny = round(Ny)
+    Nx = round(Nx)
+    click.echo(f"Wartości dla podanego GSD {gsd}m:")
+    click.echo(f"Lx: {round(Lx)}")
+    click.echo(f"Ly: {round(Ly)}")
+    click.echo(f"Bx: {round(Bx)}")
+    click.echo(f"By: {round(By)}")
+    click.echo(f"Pz: {round(Pz)}")
+    click.echo(f"Pm: {round(Pm)}")
+    click.echo(f"Pn: {round(Pn)}")
+    click.echo(f"Ny: {round(Ny)}")
+    click.echo(f"Nx: {round(Nx)}")
 
 @click.command()
 def main():
-    click.echo("Podaj Hmin i Hmax")
-    Hmin = click.prompt("Hmin", type=float)
-    Hmax = click.prompt("Hmax", type=float)
+    click.echo("Podaj Hmin i Hmax terenu")
+    Hmin = click.prompt("Hmin [m]", type=float)
+    Hmax = click.prompt("Hmax [m]", type=float)
     Hsr = (Hmin + Hmax) / 2
 
     click.echo("Wybrać domyślną kamerę spośród podanych czy podać parametry kamery?")
@@ -340,46 +317,56 @@ def main():
     click.echo("4. UltraCam Falcon")
     click.echo("5. UltraCam Hawk")
     choice = click.prompt("Wybierz opcję", type=int)
-    m, LX, LY, BX, BY = 0, 0, 0, 0, 0, 0
+    # m, LX, LY, BX, BY = 0, 0, 0, 0, 0, 0
     match choice:
         case 1:
-            click.echo("Podaj parametry kamery")
-            m, LX, LY, BX, BY = camera_params()
+            f, px, lX, lY = camera_params()
         case 2:
-            m, LX, LY, BX, BY = camera_params(92, 7.2, 12096, 11200)
+            f, px, lX, lY = 15552, 12096, 7.2, 92
         case 3:
-            m, LX, LY, BX, BY = camera_params(92, 5.6, 15552, 14144)
+            f, px, lX, lY = 14430, 15552, 5.6, 92
         case 4:
-            m, LX, LY, BX, BY = camera_params(70, 7.2, 14430, 9420)
+            f, px, lX, lY = 11704, 7920, 6.0, 70
         case 5:
-            m, LX, LY, BX, BY = camera_params(70, 6.0, 11704, 7920)
+            f, px, lX, lY = 11704, 7920, 6.0, 70
         case _:
             click.echo("Podano nieprawidłową wartość, podaj parametry kamery")
-            m, LX, LY, BX, BY = camera_params()
+            f, px, lX, lY = camera_params()
+    gsd = click.prompt("Podaj GSD [m]", type=float)
     click.echo(f"Podaj Xmin, Xmax, Ymin, Ymax")
-    Xmin = click.prompt("Xmin", type=float)
-    Xmax = click.prompt("Xmax", type=float)
-    Ymin = click.prompt("Ymin", type=float)
-    Ymax = click.prompt("Ymax", type=float)
+    Xmin = click.prompt("Xmin [m]", type=float)
+    Xmax = click.prompt("Xmax [m]", type=float)
+    Ymin = click.prompt("Ymin [m]", type=float)
+    Ymax = click.prompt("Ymax [m]", type=float)
     DX = Xmax - Xmin
     DY = Ymax - Ymin
     p = click.prompt("Podaj p", type=float)
     q = click.prompt("Podaj q", type=float)
-    Wmax = px / (gsd * f)
-    click.echo(f"Wysokość lotu musi być większa niż {Wmax}")
+    Wmax = px / (gsd * f) + Hsr
+    click.echo(f"Wysokość lotu musi być większa niż {round(Wmax)}m, podana średnia wysokość podanego terenu to {round(Hsr)}m")
     click.echo(f"Dostępne samoloty na danym pułapie to:")
-    if Wmax < 4572:
-        click.echo("Tencam MMA")
-    if Wmax < 4785:
-        click.echo("Cessna T206H NAV III")
-    if Wmax < 6100:
-        click.echo("Vulcan Air P68 Obeserver 2")
-    if Wmax < 8200:
-        click.echo("Cessna 402")
+    planes = [['Tencam MMA', 4572], ['Cessna T206H NAV III', 4785], ['Vulcan Air P68 Obeserver 2', 6100], ['Cessna 402', 8200]]
+    for plane in planes:
+        plane_gsd = plane[1] * px / f
+        if Wmax <= plane[1]:
+            click.echo(f"{plane[0]} z maksymalnym pułapem {plane[1]}m i maksymalnym GSD równym {round(plane_gsd)}")
+        else:
+            click.echo(f"Potrzebna wysokość lotu dla samolotu {plane[0]} jest zbyt duża, maksymalny pułap lotu samolotu wynosi {plane[1]}m, a maksymalne GSD dla tego samolotu to {round(plane_gsd)}")
 
+    print_params(lX, lY, p, q, DX, DY, gsd)
+    powtorzyc = 'tak'
+    while powtorzyc == 'tak':
+        click.echo("Czy chcesz powtórzyć obliczenia dla innej wartości GSD?")
+        powtorzyc = click.prompt("Tak/Nie", type=str)
+        powtorzyc = powtorzyc.lower()
 
+        while powtorzyc not in ['tak', 'nie']:
+            click.echo("Podano nieprawidłową wartość")
+            powtorzyc = click.prompt("Tak/Nie", type=str)
 
-    
+        if powtorzyc == 'tak':
+            gsd = click.prompt("Podaj GSD [m]", type=float)
+            print_params(lX, lY, p, q, DX, DY, gsd)
 
 
 if __name__ == '__main__':
