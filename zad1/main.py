@@ -28,7 +28,7 @@ def camera_params() -> tuple:
         cycle = click.prompt("Podaj cykl pracy kamery [s]", type=float)
     return f, px, lX, lY, cycle
 
-def print_params(lX, lY, p, q, DX, DY, gsd, cycle, speed) -> tuple:
+def calc_and_print_params(lX, lY, p, q, DX, DY, gsd, cycle, speed) -> tuple:
     Lx = lX * gsd
     Ly = lY * gsd
     Bx = Lx * (1 - p)
@@ -146,7 +146,7 @@ def main():
         W = planes[plane_choice-2][1]
         s = planes[plane_choice-2][2]
 
-    Lx, Ly, Bx, By, _, _, _, Ny, Nx = print_params(lX, lY, p, q, DX, DY, gsd, cycle, s)
+    Lx, Ly, Bx, By, _, _, _, Ny, Nx = calc_and_print_params(lX, lY, p, q, DX, DY, gsd, cycle, s)
     powtorzyc = 'tak'
     while powtorzyc == 'tak':
         click.echo("Czy chcesz powtórzyć obliczenia dla innej wartości GSD?")
@@ -159,7 +159,7 @@ def main():
 
         if powtorzyc == 'tak':
             gsd = click.prompt("Podaj GSD [m]", type=float)
-            Lx, Ly, Bx, By, _, _, _, Ny, Nx = print_params(lX, lY, p, q, DX, DY, gsd, cycle, s)
+            Lx, Ly, Bx, By, _, _, _, Ny, Nx = calc_and_print_params(lX, lY, p, q, DX, DY, gsd, cycle, s)
     click.echo("Rysowanie projektu nalotu")
     fig, ax = plt.subplots()
     color = 'blue'
@@ -167,10 +167,13 @@ def main():
     x_start = Xmin - (Lx - Bx)
     for i in range(Ny):
         for j in range(Nx):
-            rect = matplotlib.patches.Rectangle((x_start + j * (Lx - Bx), Ymin + i * (Ly - By)), Lx, Ly, edgecolor=color, facecolor='none')
+            x = x_start + j * (Lx - Bx)
+            y = Ymin + i * (Ly - By)
+            # rect = matplotlib.patches.Rectangle((x_start + j * (Lx - Bx), Ymin + i * (Ly - By)), Lx, Ly, edgecolor=color, facecolor='none')
+            rect = matplotlib.patches.Rectangle((x, y), Lx, Ly, edgecolor=color, facecolor='none')
             ax.add_patch(rect)
             # add a red point in the middle of the rectangle
-            ax.plot(x_start + j * (Lx - Bx) + Lx/2, Ymin + i * (Ly - By) + Ly/2, 'ro')
+            ax.plot(x + Lx / 2, y + Ly / 2, 'ro')
     # set automatic axis scaling
     ax.autoscale()
     plt.show()
