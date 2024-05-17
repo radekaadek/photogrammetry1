@@ -101,8 +101,17 @@ def main():
     DX = Xmax - Xmin
     DY = Ymax - Ymin
     p = click.prompt("Podaj p [część dziesiętna]", type=float)
+    while p <= 0 or p >= 1:
+        click.echo('Wartość p musi być większa niż 0 i mniejsza niż 1')
+        p = click.prompt("Podaj p [część dziesiętna]", type=float)
     q = click.prompt("Podaj q [część dziesiętna]", type=float)
+    while q <= 0 or q >= 1:
+        click.echo('Wartość q musi być większa niż 0 i mniejsza niż 1')
+        q = click.prompt("Podaj q [część dziesiętna]", type=float)
     Wmax = gsd * f / px + Hsr
+    if Wmax <= Hsr:
+        click.echo(f"Coś poszło nie tak, wysokość lotu musi być większa niż {round(Wmax)}m, podana średnia wysokość podanego terenu to {round(Hsr)}m")
+        return
     click.echo(f"Wysokość lotu musi być większa niż {round(Wmax)}m, podana średnia wysokość podanego terenu to {round(Hsr)}m")
     click.echo(f"Dostępne samoloty na danym pułapie to:")
     planes = [['Tencam MMA', 4572, 120], ['Cessna T206H NAV III', 4785, 100], ['Vulcan Air P68 Obeserver 2', 6100, 135], ['Cessna 402', 8200, 132]]
