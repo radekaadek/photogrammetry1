@@ -37,7 +37,7 @@ def calc_and_print_params(lX, lY, p, q, DX, DY, gsd, cycle, speed) -> tuple:
     Pm = (Lx - Bx) * Ly
     Pn = Bx * By
     Ny = DX / Bx
-    Nx = DY / By + 2
+    Nx = DY / By + 1
     Ny = math.ceil(Ny)
     Nx = math.ceil(Nx)
     click.echo(f"Wartości dla podanego GSD = {gsd}m:")
@@ -164,7 +164,7 @@ def main():
     fig, ax = plt.subplots()
     color = 'blue'
     # remove 1 cycle from the start
-    x_start = Xmin - (Lx - Bx)
+    x_start = Xmin - (Lx - Bx)*2
     for i in range(Ny):
         for j in range(Nx):
             x = x_start + j * (Lx - Bx)
