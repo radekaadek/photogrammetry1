@@ -6,7 +6,7 @@ print(cv2.__version__)
 
 # read black and white image
 img = cv2.imread(r'7ac599_56eff02023de4662aaff896e0d87553d~mv2.webp')
-print(img)
+# print(img)
 
 # cv2.namedWindow('image', cv2.WINDOW_AUTOSIZE)
 # cv2.imshow('image', img)
@@ -79,26 +79,42 @@ print(f"Img shape: {img.shape}")
 # cv2 window with a zoom param
 
 # global img_zoom
-def zooms(images=[], add_img=None, zoom=True):
+def zooms(images=[], add_img=None, zoom=True, x=0, y=0):
     if add_img is not None:
         images.append(img)
     if zoom:
         # zoom into the images[-1]
         last_img = images[-1]
         shape = last_img.shape
-        # take the minimum of the two
-        min_shape = min(shape[0], shape[1])
-        wh = min_shape // 4
-        # img_zoom = img[y-100:y+100, x-100:x+100]
-        x1 = max(0, shape[1] // 2 - wh)
-        x2 = min(shape[1], shape[1] // 2 + wh)
-        y1 = max(0, shape[0] // 2 - wh)
-        y2 = min(shape[0], shape[0] // 2 + wh)
-        # img_zoom = img[y1:y2, x1:x2]
-        # make sure the zoomed image isnt 0 pixels
-        if x1 == x2 or y1 == y2:
-            return images[-1]
-        img_zoom = last_img[y1:y2, x1:x2]
+
+        # cut image in half around the x, y coordinates
+        x_start = max(x - shape[0] // 4, 0)
+        x_end = min(x + shape[0] // 4, shape[0])
+        y_start = max(y - shape[1] // 4, 0)
+        y_end = min(y + shape[1] // 4, shape[1])
+        # check if x_start == x_end or y_start == y_end
+        if x_start > x_end:
+            x_start, x_end = x_end, x_start
+        if y_start > y_end:
+            y_start, y_end = y_end, y_start
+        if x_start == 0:
+            x_end = shape[0] // 2
+        if y_start == 0:
+            y_end = shape[1] // 2
+        if x_end == shape[0]:
+            x_start = max(x_end - shape[0] // 2, 0)
+        if y_end == shape[1]:
+            y_start = max(y_end - shape[1] // 2, 0)
+        print(f"x_start: {x_start}, x_end: {x_end}, y_start: {y_start}, y_end: {y_end}")
+        img_zoom = last_img[y_start:y_end, x_start:x_end]
+        if x_start == x_end:
+            img_zoom = last_img[y_start:y_end, x_start:]
+        if y_start == y_end:
+            img_zoom = last_img[y_start:, x_start:x_end]
+        if x_start == x_end and y_start == y_end:
+            return last_img
+
+
         images.append(img_zoom)
         return images[-1]
     else:
@@ -117,7 +133,7 @@ def print_coordinates(event, x, y, flags, param):
         print(x, y)
     #scroll
     elif event == cv2.EVENT_MBUTTONDOWN:
-        img_zoom = zooms(zoom=True)
+        img_zoom = zooms(zoom=True, x=x, y=y)
         cv2.destroyAllWindows()
         cv2.namedWindow('zoom')
         cv2.setMouseCallback('zoom', print_coordinates)
