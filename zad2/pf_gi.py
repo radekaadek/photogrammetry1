@@ -79,9 +79,20 @@ print(f"Img shape: {img.shape}")
 # cv2 window with a zoom param
 
 # global img_zoom
-def zooms(images=[], add_img=None, zoom=True, x=0, y=0):
+def zooms(images=[], add_img=None, zoom=True, x=0, y=0, extents=[], ret_xy_pos=False):
+    if ret_xy_pos:
+        # walk through extents and return the x, y coordinates on the first image
+        x_ret = 0
+        y_ret = 0
+        for extent in extents:
+            x_ret += extent[0]
+            y_ret += extent[1]
+        x_ret += x
+        y_ret += y
+        return x_ret, y_ret
     if add_img is not None:
         images.append(img)
+        extents.append((0, 0, img.shape[1], img.shape[0]))
     if zoom:
         # zoom into the images[-1]
         last_img = images[-1]
@@ -103,9 +114,10 @@ def zooms(images=[], add_img=None, zoom=True, x=0, y=0):
             y_end = shape[1] // 2
         if x_end == shape[0]:
             x_start = max(x_end - shape[0] // 2, 0)
+            x_start = min(x_start, x)
         if y_end == shape[1]:
             y_start = max(y_end - shape[1] // 2, 0)
-        print(f"x_start: {x_start}, x_end: {x_end}, y_start: {y_start}, y_end: {y_end}")
+            y_start = min(y_start, y)
         img_zoom = last_img[y_start:y_end, x_start:x_end]
         if x_start == x_end:
             img_zoom = last_img[y_start:y_end, x_start:]
@@ -116,21 +128,23 @@ def zooms(images=[], add_img=None, zoom=True, x=0, y=0):
 
 
         images.append(img_zoom)
+        extents.append((x_start, y_start, x_end, y_end))
         return images[-1]
     else:
         # zoom out to the images[-2]
         if len(images) > 1:
             images.pop()
             return images[-1]
-        else:
+        elif len(images) == 1:
             return images[-1]
+        else:
+            return None
 
-
-zooms(add_img=img)
+zooms(add_img=imgRGB)
 
 def print_coordinates(event, x, y, flags, param):
     if event == cv2.EVENT_LBUTTONDBLCLK:
-        print(x, y)
+        print(zooms(ret_xy_pos=True, x=x, y=y))
     #scroll
     elif event == cv2.EVENT_MBUTTONDOWN:
         img_zoom = zooms(zoom=True, x=x, y=y)
@@ -166,4 +180,6 @@ cv2.imshow('image', img)
 while True:
     if cv2.waitKey(20) & 0xFF == 27:
         break
+
+cv2.destroyAllWindows()
 
